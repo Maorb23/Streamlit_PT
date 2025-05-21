@@ -129,8 +129,7 @@ def monty_hall_app():
 
     Use the slider below to run simulations and see which strategy works better.
     
-    *EXTRA: Check the "Explore More" option to explore the win rates distribution over iterations.*
-                
+    **EXTRA:** Check the "Explore More" option to explore the win rates distribution over iterations.           
     """)
 
     with st.form("monty_form"):
