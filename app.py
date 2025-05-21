@@ -3,6 +3,7 @@ import os
 import base64
 import pathlib
 from birthday_problem.view import birthday_problem_app  # <-- Import the birthday view
+from monty_hall.view import monty_hall_app  # <-- Import the Monty Hall view
 
 # --- Page Configuration ---
 st.set_page_config(page_title="Private Tutor Site", layout="wide")
@@ -54,6 +55,9 @@ if st.sidebar.button("📄 CV"):
     st.session_state.page = 'CV'
 if st.sidebar.button("🎂 Birthday Problem"):
     st.session_state.page = 'Birthday'
+if st.sidebar.button("🚪 Monty Hall"):
+    st.session_state.page = "Monty"
+
 
 page = st.session_state.page
 
@@ -134,3 +138,5 @@ elif page == "CV":
     render_cv()
 elif page == "Birthday":
     birthday_problem_app()
+elif page == "Monty":
+    monty_hall_app()
