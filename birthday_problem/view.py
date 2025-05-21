@@ -25,7 +25,7 @@ def birthday_problem_app():
     - In a group of just **23 people**, there's over a **50% chance** that two share a birthday.
     - In a group of **50 people**, the chance rises to **97%**.
 
-    This simulation Uses **realistic birth dates probabilities in the US from 2019** with 0 perturbation. You can adjust the perturbation level to see how it affects the distribution of birthdays and the probability of shared birthdays.
+    This simulation is based on **real U.S. birth date probabilities from 2019** with 0 perturbation. You can adjust the perturbation level to see how it affects the distribution of birthdates and the probability of shared birthdays.
 
     Use the sliders below to explore your own scenarios!
     """)
