@@ -1,0 +1,23 @@
+# Ignore video files
+videos/
+*.mp4
+*.mov
+*.webm
+*.ogg
+
+# Ignore images
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# Ignore Streamlit cache and Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+.env.*
+.venv/
+.DS_Store
