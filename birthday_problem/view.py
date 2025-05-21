@@ -14,7 +14,7 @@ def create_bokeh_plot(birthday_probs):
     return p
 
 def birthday_problem_app():
-    st.subheader("🎂 Birthday Problem Simulator")
+    st.title("🎂 Birthday Problem Simulator")
     st.markdown("""
     ## **About the Birthday Problem**
 
