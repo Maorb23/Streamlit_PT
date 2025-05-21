@@ -15,6 +15,20 @@ def create_bokeh_plot(birthday_probs):
 
 def birthday_problem_app():
     st.subheader("🎂 Birthday Problem Simulator")
+    st.markdown("""
+    ### 📘 About the Birthday Problem
+
+    The Birthday Problem asks:  
+    **What is the probability that at least two people in a group share the same birthday?**
+
+    While it seems unlikely, the math is surprising:
+    - In a group of just **23 people**, there's over a **50% chance** that two share a birthday.
+    - In a group of **50 people**, the chance rises to **97%**.
+
+    This simulation Uses **realistic birth dates probabilities in the US from 2019** with 0 perturbation. You can adjust the perturbation level to see how it affects the distribution of birthdays and the probability of shared birthdays.
+
+    Use the sliders below to explore your own scenarios!
+    """)
 
     with st.form("birthday_sim_form"):
         n_students = st.slider("Number of Students", 2, 100, 23)
