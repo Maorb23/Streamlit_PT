@@ -16,7 +16,7 @@ def create_bokeh_plot(birthday_probs):
 def birthday_problem_app():
     st.subheader("🎂 Birthday Problem Simulator")
     st.markdown("""
-    ### 📘 About the Birthday Problem
+    ## **About the Birthday Problem**
 
     The Birthday Problem asks:  
     **What is the probability that at least two people in a group share the same birthday?**
