@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import base64
+import pathlib
 
 # --- Page Configuration and Theme ---
 st.set_page_config(page_title="Private Tutor Site", layout="wide")
@@ -92,13 +93,16 @@ if st.sidebar.button("📄 CV", key="cv_btn"):
 
 page = st.session_state.page
 
+
+# Base directory of the script (works on Streamlit Cloud too)
+BASE_DIR = pathlib.Path(__file__).parent.resolve()
+
 # --- Helper: Load Videos ---
 def list_videos(category):
-    path = os.path.join('videos', category.lower())
-    if not os.path.exists(path):
+    path = BASE_DIR / 'videos' / category.lower()
+    if not path.exists():
         return []
-    return [os.path.join(path, f) for f in os.listdir(path)
-            if f.lower().endswith(('.mp4', '.mov', '.webm', '.ogg'))]
+    return [str(f) for f in path.glob("*") if f.suffix.lower() in (".mp4", ".mov", ".webm", ".ogg")]
 
 # --- Page: Home ---
 def render_home():
