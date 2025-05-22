@@ -151,7 +151,7 @@ def render_cv():
         with open(pdf_path, "rb") as f:
             base64_pdf = base64.b64encode(f.read()).decode('utf-8')
         st.markdown(f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800px"></iframe>', unsafe_allow_html=True)
-        st.download_button("Download CV", data=open(pdf_path, "rb"), file_name="CV.pdf", mime="application/pdf")
+        st.download_button("Download CV", data=open(pdf_path, "rb"), file_name="Maor_Blumberg_CV.pdf", mime="application/pdf")
     else:
         st.error("CV PDF not found.")
 
