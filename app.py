@@ -2,28 +2,61 @@ import streamlit as st
 import os
 import base64
 import pathlib
-from birthday_problem.view import birthday_problem_app  # <-- Import the birthday view
-from monty_hall.view import monty_hall_app  # <-- Import the Monty Hall view
+from birthday_problem.view import birthday_problem_app
+from monty_hall.view import monty_hall_app
 
-# --- Page Configuration ---
 st.set_page_config(page_title="Private Tutor Site", layout="wide")
+# --- Mobile device warning ---
+if "streamlit" in st.runtime.scriptrunner.get_script_run_context().__class__.__name__.lower():
+    user_agent = st.runtime.scriptrunner.get_script_run_context().client.request_headers.get("user-agent", "")
+    if "mobile" in user_agent.lower():
+        st.warning("📱 You’re viewing this on a **mobile device**. Layout is optimized, but performance and interactivity may vary.")
 
-# --- Custom CSS ---
+
 def local_css():
     st.markdown("""
     <style>
-      div[data-testid="stAppViewContainer"] { background-color: #fffafa !important; }
-      section[data-testid="stSidebar"] { background-color: #f5f5f0 !important; }
-      .stButton > button {
-          width: 100%;
-          background-color: #a9a9a9 !important;
-          color: white;
-          border-radius: 8px;
-          margin-bottom: 8px;
-          padding: 10px 15px;
-          font-size: 1.1rem;
-      }
-      .stButton > button:hover { background-color: #0059b3 !important; color: #778899 !important; }
+    div[data-testid="stAppViewContainer"] {
+        background-color: #fffafa !important;
+    }
+    section[data-testid="stSidebar"] {
+        background-color: #f5f5f0 !important;
+    }
+    .stButton > button {
+        width: 100%;
+        background-color: #a9a9a9 !important;
+        color: white;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        padding: 10px 15px;
+        font-size: 1.1rem;
+    }
+    .stButton > button:hover {
+        background-color: #0059b3 !important;
+        color: #778899 !important;
+    }
+
+    /* -------- Responsive tweaks for mobile -------- */
+    @media screen and (max-width: 768px) {
+        .stButton > button {
+            font-size: 1.3rem !important;
+            padding: 12px 18px !important;
+        }
+        section[data-testid="stSidebar"] {
+            width: 100vw !important;
+        }
+        img {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+        iframe {
+            width: 100% !important;
+        }
+        .element-container {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -31,7 +64,6 @@ local_css()
 
 BASE_DIR = pathlib.Path(__file__).parent.resolve()
 
-# --- Load logo ---
 with open("symbol_no_background.png", "rb") as f:
     sidebar_logo_base64 = base64.b64encode(f.read()).decode()
 
@@ -42,11 +74,9 @@ st.sidebar.markdown(f"""
     <div style='height: 80px;'></div>
 """, unsafe_allow_html=True)
 
-# --- Initialize session state ---
 if 'page' not in st.session_state:
     st.session_state.page = 'Home'
 
-# --- Sidebar Navigation ---
 if st.sidebar.button("🏠 Home"):
     st.session_state.page = 'Home'
 if st.sidebar.button("🎥 Videos"):
@@ -58,34 +88,31 @@ if st.sidebar.button("🎂 Birthday Problem"):
 if st.sidebar.button("🚪 Monty Hall"):
     st.session_state.page = "Monty"
 
-
 page = st.session_state.page
 
-# --- Helper ---
 def list_videos(category):
     path = BASE_DIR / 'videos' / category.lower()
     if not path.exists():
         return []
     return [str(f) for f in path.glob("*") if f.suffix.lower() in (".mp4", ".mov", ".webm", ".ogg")]
 
-# --- Pages ---
 def render_home():
     st.markdown(
         f"""
         <div style='background-color:#ffffff; padding:30px; border-radius:12px;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width:900px; margin:auto;'>
-            <div style='display:flex; align-items:center;'>
+            <div style='display:flex; flex-wrap:wrap; align-items:center;'>
                 <img src='data:image/jpeg;base64,{base64.b64encode(open("Headshot.jpeg", "rb").read()).decode()}'  
-                     width='180' style='border-radius:12px; margin-top:50px; margin-right:30px;' />
+                     width='180' style='border-radius:12px; margin-top:30px; margin-right:30px;' />
                 <div>
                     <h1 style='margin-bottom:5px; margin-left:5px; color:#004080;'>Maor Blumberg</h1>
-                    <p style='line-height: 1.6; font-size: 36px;'>
+                    <p style='line-height: 1.6; font-size: 28px;'>
                         <strong>📧</strong> <a href='mailto:maorblumberg@gmail.com'>maorblumberg@gmail.com</a><br>
                         <strong>📞</strong> <a href='tel:+972543276073'>+972 543276073</a><br>
                         <strong>🔗</strong> <a href='https://www.linkedin.com/in/maor-blumberg-9b5a43259/'>LinkedIn</a><br>
                         <strong>💻</strong> <a href='https://github.com/Maorb23'>GitHub</a>
                     </p>
-                    <div style='text-align:center; margin-top:30px; font-size:18px; color:#333;'>
+                    <div style='margin-top:30px; font-size:18px; color:#333;'>
                         Welcome! Use the sidebar to explore topics and access my CV.<br>
                         I specialize in personalized learning for Statistics, Probability and Machine Learning.
                     </div>
@@ -104,8 +131,7 @@ def render_videos():
         all_videos.extend(list_videos(cat))
     if all_videos:
         st.subheader("Featured Video")
-        vid_path = all_videos[0]
-        st.video(vid_path)
+        st.video(all_videos[0])
     else:
         st.info("No videos found. Place video files in /videos/[category]/ folders.")
 
