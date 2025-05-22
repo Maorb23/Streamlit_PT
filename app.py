@@ -4,13 +4,13 @@ import base64
 import pathlib
 from birthday_problem.view import birthday_problem_app
 from monty_hall.view import monty_hall_app
+from streamlit_javascript import st_javascript
+
+user_agent = st_javascript("navigator.userAgent")
+if user_agent and "mobile" in user_agent.lower():
+    st.warning("📱 You’re viewing this on a **mobile device**. Layout is optimized, but performance and interactivity may vary.")
 
 st.set_page_config(page_title="Private Tutor Site", layout="wide")
-# --- Mobile device warning ---
-if "streamlit" in st.runtime.scriptrunner.get_script_run_context().__class__.__name__.lower():
-    user_agent = st.runtime.scriptrunner.get_script_run_context().client.request_headers.get("user-agent", "")
-    if "mobile" in user_agent.lower():
-        st.warning("📱 You’re viewing this on a **mobile device**. Layout is optimized, but performance and interactivity may vary.")
 
 
 def local_css():
