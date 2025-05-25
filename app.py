@@ -83,9 +83,9 @@ if st.sidebar.button("🎥 Videos"):
     st.session_state.page = 'Videos'
 if st.sidebar.button("📄 CV"):
     st.session_state.page = 'CV'
-if st.sidebar.button("🎂 Birthday Problem"):
+if st.sidebar.button("🎂 Birthday Paradox"):
     st.session_state.page = 'Birthday'
-if st.sidebar.button("🚪 Monty Hall"):
+if st.sidebar.button("🚪 Monty Hall Paradox"):
     st.session_state.page = "Monty"
 
 page = st.session_state.page
