@@ -156,7 +156,7 @@ ANNOTATIONS = [
         "x": 220,
         "y": 155,
         "height": 22,
-        "width": 40,
+        "width": 65,
         "color": "red",
         "border": "solid",      # you can omit border for a filled rectangle
     },
@@ -172,35 +172,78 @@ ANNOTATIONS = [
 ]
 
 def on_annotation_click(annotation):
-    """This gets called when a user taps one of your red/blue boxes."""
-    st.toast(f"Annotation clicked: {annotation}", icon="✏️")
+    # this runs in your Streamlit script, so use st.info() or st.success()
+    st.info("👋 Check out my GitHub at https://github.com/Maorb23")
 
-def render_cv():
+def render_cv_alternative():
     st.title("Curriculum Vitae")
-
     pdf_path = BASE_DIR / "Maor_Blumberg CV_Updated_ds.pdf"
     if not pdf_path.exists():
         st.error("CV PDF not found.")
         return
 
-    # display with annotations and click‐handler
-    pdf_viewer(
-        input=str(pdf_path),
-        annotations=ANNOTATIONS,
-        on_annotation_click=on_annotation_click,
-        width="100%",
-        height=800,
-    )
+    # Simplified annotation structure
+    annotations = [
+        {
+            "page": 0,  # Try 0-indexed if 1-indexed doesn't work
+            "x": 220,
+            "y": 155,
+            "width": 65,
+            "height": 22,
+            "color": "#ff0000",
+            "opacity": 0.3,
+            "label": "GitHub Link"
+        },
+        {
+            "page": 0,
+            "x": 220,
+            "y": 180,
+            "width": 120,
+            "height": 18,
+            "color": "#0000ff",
+            "opacity": 0.3,
+            "label": "Contact Info"
+        }
+    ]
 
-    # Download fallback
-    with open(pdf_path, "rb") as f:
-        pdf_bytes = f.read()
-    st.download_button(
-        "📄 Download CV",
-        data=pdf_bytes,
-        file_name="Maor_Blumberg_CV.pdf",
-        mime="application/pdf",
-    )
+    # Create columns for better layout
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        # Render PDF viewer
+        result = pdf_viewer(
+            input=pdf_path,
+            annotations=annotations,
+            width=700,
+            height=800
+        )
+        
+        # Handle clicks
+        if result:
+            st.json(result)  # Debug output
+            
+    with col2:
+        st.subheader("Quick Actions")
+        
+        if st.button("🔗 Visit GitHub"):
+            st.success("Opening GitHub...")
+            st.markdown("[GitHub Profile](https://github.com/Maorb23)")
+            
+        if st.button("📧 Contact Me"):
+            st.info("Email: maorblumberg@gmail.com")
+        
+        st.markdown("---")
+        
+        # Download button
+        with open(pdf_path, "rb") as f:
+            pdf_bytes = f.read()
+        st.download_button(
+            "📄 Download CV",
+            data=pdf_bytes,
+            file_name="Maor_Blumberg_CV.pdf",
+            mime="application/pdf",
+        )
+
 
 
 
@@ -210,7 +253,7 @@ if page == "Home":
 elif page == "Videos":
     render_videos()
 elif page == "CV":
-    render_cv()
+    render_cv_alternative()
 elif page == "Birthday":
     birthday_problem_app()
 elif page == "Monty":
