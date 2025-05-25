@@ -156,7 +156,7 @@ ANNOTATIONS = [
         "x": 220,
         "y": 155,
         "height": 22,
-        "width": 65,
+        "width": 40,
         "color": "red",
         "border": "solid",      # you can omit border for a filled rectangle
     },
