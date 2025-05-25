@@ -4,7 +4,8 @@ import base64
 import pathlib
 from birthday_problem.view import birthday_problem_app
 from monty_hall.view import monty_hall_app
-import streamlit.components.v1 as components
+from streamlit_pdf_viewer import pdf_viewer
+
 
 #from streamlit_javascript import st_javascript
 
@@ -150,22 +151,23 @@ def render_videos():
 def render_cv():
     st.title("Curriculum Vitae")
     pdf_path = BASE_DIR / "Maor_Blumberg CV_Updated_ds.pdf"
+
     if pdf_path.exists():
+        # Use the PDF viewer component
+        pdf_viewer(input=str(pdf_path), width="100%", height=800)
+
+        # Always keep the download button as a fallback
         with open(pdf_path, "rb") as f:
-            base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-        pdf_data_url = f"data:application/pdf;base64,{base64_pdf}"
-
-        # Use Streamlit's iframe component rather than raw Markdown
-        components.iframe(pdf_data_url, width="100%", height=800)
-
+            pdf_bytes = f.read()
         st.download_button(
-            "Download CV",
-            data=open(pdf_path, "rb"),
+            "📄 Download CV",
+            data=pdf_bytes,
             file_name="Maor_Blumberg_CV.pdf",
-            mime="application/pdf"
+            mime="application/pdf",
         )
     else:
         st.error("CV PDF not found.")
+
 
 
 # --- Route Pages ---
