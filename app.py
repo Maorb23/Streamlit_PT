@@ -148,25 +148,59 @@ def render_videos():
         st.warning(f"No videos in {choice}.")
 
 
+
+# Define your annotations (example positions on page 1)
+ANNOTATIONS = [
+    {
+        "page": 1,
+        "x": 220,
+        "y": 155,
+        "height": 22,
+        "width": 65,
+        "color": "red",
+        "border": "solid",      # you can omit border for a filled rectangle
+    },
+    {
+        "page": 1,
+        "x": 220,
+        "y": 180,
+        "height": 18,
+        "width": 120,
+        "color": "blue",
+        "border": "dotted",
+    }
+]
+
+def on_annotation_click(annotation):
+    """This gets called when a user taps one of your red/blue boxes."""
+    st.toast(f"Annotation clicked: {annotation}", icon="✏️")
+
 def render_cv():
     st.title("Curriculum Vitae")
+
     pdf_path = BASE_DIR / "Maor_Blumberg CV_Updated_ds.pdf"
-
-    if pdf_path.exists():
-        # Use the PDF viewer component
-        pdf_viewer(input=str(pdf_path), width="100%", height=800)
-
-        # Always keep the download button as a fallback
-        with open(pdf_path, "rb") as f:
-            pdf_bytes = f.read()
-        st.download_button(
-            "📄 Download CV",
-            data=pdf_bytes,
-            file_name="Maor_Blumberg_CV.pdf",
-            mime="application/pdf",
-        )
-    else:
+    if not pdf_path.exists():
         st.error("CV PDF not found.")
+        return
+
+    # display with annotations and click‐handler
+    pdf_viewer(
+        input=str(pdf_path),
+        annotations=ANNOTATIONS,
+        on_annotation_click=on_annotation_click,
+        width="100%",
+        height=800,
+    )
+
+    # Download fallback
+    with open(pdf_path, "rb") as f:
+        pdf_bytes = f.read()
+    st.download_button(
+        "📄 Download CV",
+        data=pdf_bytes,
+        file_name="Maor_Blumberg_CV.pdf",
+        mime="application/pdf",
+    )
 
 
 
