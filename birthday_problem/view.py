@@ -1,17 +1,33 @@
 # birthday_problem/view.py
 
 import streamlit as st
-import numpy as np
-from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource
 from .model import simulate_non_uniform_birthdays, generate_birthday_distribution
 
-def create_bokeh_plot(birthday_probs):
-    days = np.arange(1, 366)
-    source = ColumnDataSource(data=dict(x=days, y=birthday_probs))
-    p = figure(title="Non-Uniform Birthday Distribution", x_axis_label='Day of the Year', y_axis_label='Probability', height=300, sizing_mode='stretch_width')
-    p.vbar(x='x', top='y', width=1, source=source)
-    return p
+
+def create_birthday_chart(birthday_probs):
+    values = [
+        {"day": int(day), "probability": float(probability)}
+        for day, probability in zip(range(1, 366), birthday_probs)
+    ]
+    return {
+        "data": {"values": values},
+        "mark": {"type": "bar", "tooltip": True},
+        "encoding": {
+            "x": {
+                "field": "day",
+                "type": "quantitative",
+                "title": "Day of the Year",
+            },
+            "y": {
+                "field": "probability",
+                "type": "quantitative",
+                "title": "Probability",
+            },
+        },
+        "height": 300,
+        "title": "Non-Uniform Birthday Distribution",
+    }
+
 
 def birthday_problem_app():
     st.title("🎂 Birthday Problem Simulator")
@@ -40,4 +56,6 @@ def birthday_problem_app():
         prob_shared = simulate_non_uniform_birthdays(n_students, birthday_probs)
 
         st.success(f"📊 Probability of shared birthday: **{prob_shared:.3f}**")
-        st.bokeh_chart(create_bokeh_plot(birthday_probs), use_container_width=True)
+        st.vega_lite_chart(
+            create_birthday_chart(birthday_probs), use_container_width=True
+        )

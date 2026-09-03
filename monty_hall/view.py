@@ -1,11 +1,6 @@
 import streamlit as st
 import numpy as np
-from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource
-from bokeh.models import Band
 
-from bokeh.models import Band, ColumnDataSource
-from bokeh.plotting import figure
 
 def simulate_monty_hall(n_simulations=1000):
     # Randomly assign winning doors
@@ -20,30 +15,47 @@ def simulate_monty_hall(n_simulations=1000):
 
     return stay_wins, switch_wins
 
+
 def create_monty_plot(stay_wins, switch_wins, n_simulations):
-    categories = ["Stay", "Switch"]
-    win_rates = [stay_wins / n_simulations * 100, switch_wins / n_simulations * 100]
-    colors = ["#df1a1a", "#108a22"]
-
-    source = ColumnDataSource(data=dict(
-        strategies=categories,
-        win_rates=win_rates,
-        fill_color=colors  # Add color here
-    ))
-
-    p = figure(x_range=categories, height=350, title="Win Rates by Strategy (%)",
-               toolbar_location=None, tools="", sizing_mode="stretch_width")
-
-    p.vbar(x='strategies', top='win_rates', width=0.5, source=source, fill_color='fill_color')
-
-    p.y_range.start = 0
-    p.y_range.end = 100
-    p.yaxis.axis_label = "Win Rate (%)"
-    p.xaxis.axis_label = "Strategy"
-    p.title.align = "center"
-    p.title.text_font_size = "16pt"
-
-    return p
+    values = [
+        {
+            "strategy": "Stay",
+            "win_rate": float(stay_wins / n_simulations * 100),
+        },
+        {
+            "strategy": "Switch",
+            "win_rate": float(switch_wins / n_simulations * 100),
+        },
+    ]
+    return {
+        "data": {"values": values},
+        "mark": {"type": "bar", "tooltip": True},
+        "encoding": {
+            "x": {
+                "field": "strategy",
+                "type": "nominal",
+                "title": "Strategy",
+                "sort": ["Stay", "Switch"],
+            },
+            "y": {
+                "field": "win_rate",
+                "type": "quantitative",
+                "title": "Win Rate (%)",
+                "scale": {"domain": [0, 100]},
+            },
+            "color": {
+                "field": "strategy",
+                "type": "nominal",
+                "scale": {
+                    "domain": ["Stay", "Switch"],
+                    "range": ["#df1a1a", "#108a22"],
+                },
+                "legend": None,
+            },
+        },
+        "height": 350,
+        "title": "Win Rates by Strategy (%)",
+    }
 
 
 def create_monty_ci_plot(n_simulations, step=50, bootstrap_rounds=200):
@@ -57,8 +69,8 @@ def create_monty_ci_plot(n_simulations, step=50, bootstrap_rounds=200):
         wins = np.random.randint(0, 3, size=(bootstrap_rounds, n))
         choices = np.random.randint(0, 3, size=(bootstrap_rounds, n))
 
-        stay_win_matrix = (wins == choices)
-        switch_win_matrix = (wins != choices)
+        stay_win_matrix = wins == choices
+        switch_win_matrix = wins != choices
 
         stay_mean = stay_win_matrix.mean(axis=1)
         switch_mean = switch_win_matrix.mean(axis=1)
@@ -72,48 +84,73 @@ def create_monty_ci_plot(n_simulations, step=50, bootstrap_rounds=200):
     stay_lower, stay_upper = zip(*stay_ci)
     switch_lower, switch_upper = zip(*switch_ci)
 
-    # Create ColumnDataSources
-    stay_src = ColumnDataSource(data=dict(
-        x=iterations,
-        y=stay_rates,
-        lower=stay_lower,
-        upper=stay_upper
-    ))
+    values = []
+    for strategy, rates, lower, upper in (
+        ("Stay", stay_rates, stay_lower, stay_upper),
+        ("Switch", switch_rates, switch_lower, switch_upper),
+    ):
+        values.extend(
+            {
+                "iterations": int(iteration),
+                "win_rate": float(rate),
+                "lower": float(low),
+                "upper": float(high),
+                "strategy": strategy,
+            }
+            for iteration, rate, low, high in zip(iterations, rates, lower, upper)
+        )
 
-    switch_src = ColumnDataSource(data=dict(
-        x=iterations,
-        y=switch_rates,
-        lower=switch_lower,
-        upper=switch_upper
-    ))
-
-    p = figure(
-        title="Win Rate with Bootstrap CI over Iterations",
-        x_axis_label="Number of Simulations",
-        y_axis_label="Win Rate (%)",
-        height=400,
-        sizing_mode="stretch_width"
-    )
-
-    # Stay strategy line and CI band
-    p.line('x', 'y', source=stay_src, color="#fb0c0c", legend_label="Stay", line_width=2)
-    band1 = Band(base='x', lower='lower', upper='upper', source=stay_src,
-                 level='underlay', fill_alpha=0.2, line_width=0, fill_color="#930909")
-    p.add_layout(band1)
-
-    # Switch strategy line and CI band
-    p.line('x', 'y', source=switch_src, color="#03e707", legend_label="Switch", line_width=2)
-    band2 = Band(base='x', lower='lower', upper='upper', source=switch_src,
-                 level='underlay', fill_alpha=0.2, line_width=0, fill_color="#09df22")
-    p.add_layout(band2)
-
-    p.legend.location = "bottom_right"
-    p.y_range.start = 0
-    p.y_range.end = 100
-    p.title.align = "center"
-    p.title.text_font_size = "16pt"
-    return p
-
+    color = {
+        "field": "strategy",
+        "type": "nominal",
+        "scale": {
+            "domain": ["Stay", "Switch"],
+            "range": ["#df1a1a", "#108a22"],
+        },
+        "title": "Strategy",
+    }
+    return {
+        "data": {"values": values},
+        "layer": [
+            {
+                "mark": {"type": "area", "opacity": 0.2},
+                "encoding": {
+                    "x": {
+                        "field": "iterations",
+                        "type": "quantitative",
+                        "title": "Number of Simulations",
+                    },
+                    "y": {
+                        "field": "lower",
+                        "type": "quantitative",
+                        "title": "Win Rate (%)",
+                        "scale": {"domain": [0, 100]},
+                    },
+                    "y2": {"field": "upper"},
+                    "color": color,
+                },
+            },
+            {
+                "mark": {"type": "line", "strokeWidth": 2},
+                "encoding": {
+                    "x": {"field": "iterations", "type": "quantitative"},
+                    "y": {"field": "win_rate", "type": "quantitative"},
+                    "color": color,
+                    "tooltip": [
+                        {"field": "strategy", "type": "nominal"},
+                        {"field": "iterations", "type": "quantitative"},
+                        {
+                            "field": "win_rate",
+                            "type": "quantitative",
+                            "format": ".2f",
+                        },
+                    ],
+                },
+            },
+        ],
+        "height": 400,
+        "title": "Win Rate with Bootstrap CI over Iterations",
+    }
 
 
 def monty_hall_app():
@@ -140,7 +177,7 @@ def monty_hall_app():
     if submitted:
         stay_wins, switch_wins = simulate_monty_hall(n_simulations)
         fig = create_monty_plot(stay_wins, switch_wins, n_simulations)
-        st.bokeh_chart(fig, use_container_width=True)
+        st.vega_lite_chart(fig, use_container_width=True)
 
         st.markdown(f"""
         - **Stay Strategy** win rate: `{stay_wins / n_simulations:.2%}`
@@ -149,5 +186,4 @@ def monty_hall_app():
 
         if explore_more:
             ci_fig = create_monty_ci_plot(n_simulations)
-            st.bokeh_chart(ci_fig, use_container_width=True)
-
+            st.vega_lite_chart(ci_fig, use_container_width=True)
