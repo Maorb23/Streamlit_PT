@@ -1,7 +1,8 @@
-import streamlit as st
-import os
 import base64
+import os
 import pathlib
+
+import streamlit as st
 from birthday_problem.view import birthday_problem_app
 from monty_hall.view import monty_hall_app
 from streamlit_pdf_viewer import pdf_viewer
@@ -13,38 +14,66 @@ from streamlit_pdf_viewer import pdf_viewer
 #if user_agent and "mobile" in user_agent.lower():
 #    st.warning("📱 You’re viewing this on a **mobile device**. Layout is optimized, but performance and interactivity may vary.")
 
-st.set_page_config(page_title="Private Tutor Site", layout="wide")
-
+st.set_page_config(
+    page_title="Maor Blumberg | Private Tutor",
+    page_icon="🎓",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 def local_css():
     st.markdown("""
     <style>
+    :root { --ink:#172033; --muted:#687386; --blue:#2563eb; --line:#e5eaf2; }
+    html, body, [class*="css"] { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
     div[data-testid="stAppViewContainer"] {
-        background-color: #fffafa !important;
+        background: linear-gradient(135deg, #f7faff 0%, #ffffff 55%, #f4f8ff 100%) !important;
+        color: var(--ink);
     }
-    section[data-testid="stSidebar"] {
-        background-color: #f5f5f0 !important;
-    }
+    div[data-testid="stHeader"] { background: transparent !important; }
+    .block-container { max-width: 1180px; padding-top: 2.5rem; padding-bottom: 4rem; }
+    section[data-testid="stSidebar"] { background: #f8fafc !important; border-right: 1px solid var(--line); }
+    section[data-testid="stSidebar"] .block-container { padding: 1.25rem 1rem; }
+    .brand { padding: .5rem .4rem 1.5rem; }
+    .brand-name { color: var(--ink); font-size: 1.15rem; font-weight: 750; margin-top: .6rem; }
+    .brand-copy { color: var(--muted); font-size: .82rem; line-height: 1.45; }
+    h1, h2, h3 { color: var(--ink) !important; letter-spacing: -.025em; }
+    .hero { background: radial-gradient(circle at 88% 8%, #dbeafe 0, transparent 32%), #fff; border: 1px solid var(--line); border-radius: 24px; padding: 2.5rem; box-shadow: 0 18px 45px rgba(31,54,94,.08); margin-bottom: 1rem; }
+    .hero h1 { font-size: clamp(2.3rem, 5vw, 4.2rem); line-height: 1; margin: 0 0 .8rem; }
+    .eyebrow { color: var(--blue); font-size: .78rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .hero-lead { color: var(--muted); font-size: 1.1rem; line-height: 1.65; max-width: 680px; }
+    .contact-card { background: rgba(255,255,255,.76); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.15rem; }
+    .contact-card a { color: #163c83; text-decoration: none; }
+    .section-card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 1.3rem 1.4rem; height: 100%; }
+    .section-card h3 { margin-top: 0; font-size: 1.05rem; }
+    .section-card p { color: var(--muted); line-height: 1.55; margin-bottom: 0; }
     .stButton > button {
         width: 100%;
-        background-color: #a9a9a9 !important;
-        color: white;
-        border-radius: 8px;
+        background-color: transparent !important;
+        color: #4b5563;
+        border: 1px solid transparent;
+        border-radius: 10px;
         margin-bottom: 8px;
-        padding: 10px 15px;
-        font-size: 1.1rem;
+        padding: 9px 12px;
+        font-size: .95rem;
+        text-align: left;
     }
     .stButton > button:hover {
-        background-color: #0059b3 !important;
-        color: #778899 !important;
+        background-color: #eaf2ff !important;
+        border-color: #cfe0ff;
+        color: #163c83 !important;
     }
+    .stDownloadButton > button { width: 100%; }
 
     /* -------- Responsive tweaks for mobile -------- */
     @media screen and (max-width: 768px) {
         .stButton > button {
-            font-size: 1.3rem !important;
-            padding: 12px 18px !important;
+            font-size: 1rem !important;
+            padding: 10px 12px !important;
         }
+        .block-container { padding: 1.5rem 1rem 3rem; }
+        .hero { padding: 1.5rem; border-radius: 18px; }
+        .hero h1 { font-size: 2.5rem; }
         section[data-testid="stSidebar"] {
             width: 100vw !important;
         }
@@ -67,14 +96,19 @@ local_css()
 
 BASE_DIR = pathlib.Path(__file__).parent.resolve()
 
-with open("symbol_no_background.png", "rb") as f:
-    sidebar_logo_base64 = base64.b64encode(f.read()).decode()
+@st.cache_data(show_spinner=False)
+def read_asset_base64(filename):
+    with open(BASE_DIR / filename, "rb") as asset:
+        return base64.b64encode(asset.read()).decode()
+
+sidebar_logo_base64 = read_asset_base64("symbol_no_background.png")
 
 st.sidebar.markdown(f"""
-    <div style='position: absolute; top: 0; left: 0; z-index: 999;'>
-        <img src='data:image/png;base64,{sidebar_logo_base64}' width='60' style='display:block; margin:0; padding:0;'>
+    <div class='brand'>
+        <img src='data:image/png;base64,{sidebar_logo_base64}' width='58' style='display:block;'>
+        <div class='brand-name'>Maor Blumberg</div>
+        <div class='brand-copy'>Statistics · Probability · Machine Learning</div>
     </div>
-    <div style='height: 80px;'></div>
 """, unsafe_allow_html=True)
 
 if 'page' not in st.session_state:
@@ -102,31 +136,27 @@ def list_videos(category):
 def render_home():
     st.markdown(
         f"""
-        <div style='background-color:#ffffff; padding:30px; border-radius:12px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width:900px; margin:auto;'>
-            <div style='display:flex; flex-wrap:wrap; align-items:center;'>
-                <img src='data:image/jpeg;base64,{base64.b64encode(open("Headshot.jpeg", "rb").read()).decode()}'  
-                     width='180' style='border-radius:12px; margin-top:30px; margin-right:30px;' />
-                <div>
-                    <h1 style='margin-bottom:5px; margin-left:5px; color:#004080;'>Maor Blumberg</h1>
-                    <p style='line-height: 1.6; font-size: 28px;'>
-                        <strong>📧</strong> <a href='mailto:maorblumberg@gmail.com'>maorblumberg@gmail.com</a><br>
-                        <strong>📞</strong> <a href='tel:+972543276073'>+972 543276073</a><br>
-                        <strong>🔗</strong> <a href='https://www.linkedin.com/in/maor-blumberg-9b5a43259/'>LinkedIn</a><br>
-                        <strong>💻</strong> <a href='https://github.com/Maorb23'>GitHub</a>
-                    </p>
-                    <div style='margin-top:30px; font-size:18px; color:#333;'>
-                        Welcome! Use the sidebar to explore topics and access my CV.<br>
-                        I specialize in personalized learning for Statistics, Probability and Machine Learning.
-                    </div>
-                </div>
+        <div class='hero'>
+            <div class='eyebrow'>Private tutoring · Visual learning</div>
+            <h1>Make the hard stuff<br>click.</h1>
+            <p class='hero-lead'>Personalized tutoring in Statistics, Probability, and Machine Learning — with clear explanations, practical examples, and interactive simulations.</p>
+            <div class='contact-card'>
+                <a href='mailto:maorblumberg@gmail.com'>📧 maorblumberg@gmail.com</a>&nbsp;&nbsp; · &nbsp;&nbsp;
+                <a href='https://www.linkedin.com/in/maor-blumberg-9b5a43259/'>LinkedIn</a>&nbsp;&nbsp; · &nbsp;&nbsp;
+                <a href='https://github.com/Maorb23'>GitHub</a>
             </div>
         </div>
         """, unsafe_allow_html=True
     )
+    col1, col2, col3 = st.columns(3)
+    cards = [("Learn by doing", "Explore the video library and interactive experiments."), ("Build intuition", "Turn formulas into ideas you can explain and use."), ("Go at your pace", "Focused support for assignments, exams, and long-term mastery.")]
+    for column, (title, copy) in zip((col1, col2, col3), cards):
+        with column:
+            st.markdown(f"<div class='section-card'><h3>{title}</h3><p>{copy}</p></div>", unsafe_allow_html=True)
 
 def render_videos():
-    st.title("Tutorial Videos")
+    st.title("Tutorial videos")
+    st.caption("Short, focused explanations for the ideas that matter most.")
     categories = ["Statistics", "Probability", "Machine Learning"]
 
     all_videos = []
